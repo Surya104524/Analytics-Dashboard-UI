@@ -1,0 +1,224 @@
+{
+  "summary": {
+    "totalLearners": 28125,
+    "male": 15000,
+    "female": 11800,
+    "others": 325,
+    "activeLearners": 12250,
+    "engagedLearners": 1100
+  },
+  "courseProgress": [
+    {
+      "district": "Ariyulur",
+      "below": 10,
+      "average": 30,
+      "good": 60
+    },
+    {
+      "district": "Chennai",
+      "below": 18,
+      "average": 35,
+      "good": 47
+    },
+    {
+      "district": "Coimbatore",
+      "below": 10,
+      "average": 25,
+      "good": 65
+    },
+    {
+      "district": "Cuddalore",
+      "below": 22,
+      "average": 28,
+      "good": 50
+    },
+    {
+      "district": "Dharmapuri",
+      "below": 6,
+      "average": 18,
+      "good": 76
+    },
+    {
+      "district": "Dindigul",
+      "below": 12,
+      "average": 28,
+      "good": 60
+    },
+    {
+      "district": "Erode",
+      "below": 16,
+      "average": 26,
+      "good": 58
+    },
+    {
+      "district": "Kallakurichi",
+      "below": 8,
+      "average": 22,
+      "good": 70
+    },
+    {
+      "district": "Karur",
+      "below": 20,
+      "average": 35,
+      "good": 45
+    },
+    {
+      "district": "Madurai",
+      "below": 18,
+      "average": 32,
+      "good": 50
+    }
+  ],
+  "passStats": {
+    "overallLearners": 28125,
+    "assessmentTaken": 24500,
+    "passed": 18500,
+    "failed": 6000
+  },
+  "assessmentCompletion": {
+    "completedPercent": 85,
+    "notCompletedPercent": 15
+  },
+  "gradeBreakdown": [
+    {
+      "grade": "A",
+      "label": "A - Grade (>80)",
+      "percent": 60
+    },
+    {
+      "grade": "B",
+      "label": "B - Grade (>60)",
+      "percent": 25
+    },
+    {
+      "grade": "C",
+      "label": "C - Grade (>50)",
+      "percent": 9
+    },
+    {
+      "grade": "D",
+      "label": "D - Grade (>30)",
+      "percent": 4
+    },
+    {
+      "grade": "E",
+      "label": "E - Grade (0)",
+      "percent": 2
+    }
+  ],
+  "districtRanking": {
+    "rankBy": "enrollment",
+    "districts": [
+      {
+        "district": "Ariyulur",
+        "rank": 1,
+        "enrolled": 28125,
+        "male": 15000,
+        "female": 11800,
+        "others": 325,
+        "passed": 19000,
+        "assessmentCompleted": 24500,
+        "completionRatePercent": 87
+      },
+      {
+        "district": "Coimbatore",
+        "rank": 2,
+        "enrolled": 26250,
+        "male": 13750,
+        "female": 12000,
+        "others": 500,
+        "passed": 17750,
+        "assessmentCompleted": 22500,
+        "completionRatePercent": 86
+      },
+      {
+        "district": "Erode",
+        "rank": 3,
+        "enrolled": 24375,
+        "male": 12500,
+        "female": 11375,
+        "others": 500,
+        "passed": 16500,
+        "assessmentCompleted": 21000,
+        "completionRatePercent": 86
+      },
+      {
+        "district": "Kallakurichi",
+        "rank": 4,
+        "enrolled": 22500,
+        "male": 11800,
+        "female": 10200,
+        "others": 500,
+        "passed": 15500,
+        "assessmentCompleted": 19800,
+        "completionRatePercent": 88
+      },
+      {
+        "district": "Madurai",
+        "rank": 5,
+        "enrolled": 21250,
+        "male": 11250,
+        "female": 9500,
+        "others": 500,
+        "passed": 14800,
+        "assessmentCompleted": 19000,
+        "completionRatePercent": 89
+      },
+      {
+        "district": "Dharmapuri",
+        "rank": 6,
+        "enrolled": 20000,
+        "male": 10500,
+        "female": 9000,
+        "others": 500,
+        "passed": 14000,
+        "assessmentCompleted": 18000,
+        "completionRatePercent": 90
+      },
+      {
+        "district": "Dindigul",
+        "rank": 7,
+        "enrolled": 18750,
+        "male": 10000,
+        "female": 8250,
+        "others": 500,
+        "passed": 13250,
+        "assessmentCompleted": 17000,
+        "completionRatePercent": 91
+      },
+      {
+        "district": "Chennai",
+        "rank": 8,
+        "enrolled": 17500,
+        "male": 9375,
+        "female": 8625,
+        "others": 500,
+        "passed": 12500,
+        "assessmentCompleted": 16250,
+        "completionRatePercent": 93
+      },
+      {
+        "district": "Cuddalore",
+        "rank": 9,
+        "enrolled": 16250,
+        "male": 8750,
+        "female": 7000,
+        "others": 500,
+        "passed": 11750,
+        "assessmentCompleted": 15250,
+        "completionRatePercent": 94
+      },
+      {
+        "district": "Karur",
+        "rank": 10,
+        "enrolled": 15000,
+        "male": 8125,
+        "female": 6375,
+        "others": 500,
+        "passed": 11000,
+        "assessmentCompleted": 14250,
+        "completionRatePercent": 95
+      }
+    ]
+  }
+}
