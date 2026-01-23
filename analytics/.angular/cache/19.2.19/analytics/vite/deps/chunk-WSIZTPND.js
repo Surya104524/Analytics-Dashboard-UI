@@ -1,12 +1,4 @@
 import {
-  createSeriesData_default,
-  getLabelLineStatesModels,
-  limitSurfaceAngle,
-  limitTurnAngle,
-  prepareSeriesDataSchema,
-  setLabelLineStyle
-} from "./chunk-GVIKMCNP.js";
-import {
   Axis2D_default,
   LineDraw_default,
   LinePath_default,
@@ -39,6 +31,14 @@ import {
   updateViewOnZoom,
   warnDeprecated
 } from "./chunk-LCOI457P.js";
+import {
+  createSeriesData_default,
+  getLabelLineStatesModels,
+  limitSurfaceAngle,
+  limitTurnAngle,
+  prepareSeriesDataSchema,
+  setLabelLineStyle
+} from "./chunk-GVIKMCNP.js";
 import {
   BezierCurve_default,
   Chart_default,
@@ -18965,4 +18965,4 @@ export {
   install26 as install22,
   install27 as install23
 };
-//# sourceMappingURL=chunk-DUOSMQG5.js.map
+//# sourceMappingURL=chunk-WSIZTPND.js.map
