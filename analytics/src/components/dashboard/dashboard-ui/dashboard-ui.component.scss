@@ -191,7 +191,6 @@
   text-align: center;
   transition: transform 0.2s ease;
   position: relative;
-  // border-right: 1px solid rgba(255, 255, 255, 0.1);
   &::after {
     content: "";
     position: absolute;
@@ -231,11 +230,6 @@
       background-color: transparent;
     }
   }
-
-  .dashboard.light & {
-    // border-right: 1px solid rgba(0, 0, 0, 0.1);
-  }
-
   &:last-child,
   &.border-0 {
     border-right: none;

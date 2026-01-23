@@ -6,7 +6,7 @@ import {
   OnDestroy,
   ViewChild,
 } from "@angular/core";
-import { interval, Subject } from "rxjs";
+import { Subject } from "rxjs";
 import * as echarts from "echarts/core";
 import { BarChart, PieChart } from "echarts/charts";
 import {
@@ -103,7 +103,6 @@ export class DashboardUiComponent implements AfterViewInit, OnDestroy {
   constructor(
     private readonly cdr: ChangeDetectorRef,
     private readonly apiService: ApiService,
-    private readonly datePipe: DatePipe,
   ) {}
 
   private getYearWiseData(isCallStatus: "init" | "change") {
@@ -207,12 +206,12 @@ export class DashboardUiComponent implements AfterViewInit, OnDestroy {
   toggleTheme(): void {
     this.isDarkTheme = !this.isDarkTheme;
     localStorage.setItem("themeStatus", this.isDarkTheme ? "true" : "false");
-    if(this.isDarkTheme){
+    if (this.isDarkTheme) {
       this.initCharts();
-    } else{
-      setTimeout(()=>{
+    } else {
+      setTimeout(() => {
         this.initCharts();
-      },200)
+      }, 200);
     }
   }
 
