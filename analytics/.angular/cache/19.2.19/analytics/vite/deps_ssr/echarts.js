@@ -1,5 +1,31 @@
 import { createRequire } from 'module';const require = createRequire(import.meta.url);
 import {
+  install as install3,
+  install10 as install13,
+  install11 as install14,
+  install12 as install15,
+  install13 as install17,
+  install14 as install18,
+  install15 as install19,
+  install16 as install20,
+  install17 as install21,
+  install18 as install22,
+  install19 as install23,
+  install2 as install4,
+  install20 as install24,
+  install21 as install25,
+  install22 as install26,
+  install23 as install27,
+  install3 as install5,
+  install4 as install6,
+  install5 as install7,
+  install6 as install9,
+  install7 as install10,
+  install8 as install11,
+  install9 as install12,
+  installScatterJitter
+} from "./chunk-UQ5DQVZW.js";
+import {
   install as install28,
   install10 as install37,
   install11 as install38,
@@ -28,6 +54,16 @@ import {
   install9 as install36
 } from "./chunk-IS7VHWNI.js";
 import {
+  AXIS_BREAK_COLLAPSE_ACTION_TYPE,
+  AXIS_BREAK_EXPAND_ACTION_TYPE,
+  AXIS_BREAK_TOGGLE_ACTION_TYPE,
+  install3 as install8,
+  install4 as install16,
+  registerAction as registerAction2,
+  registerAxisBreakHelperImpl,
+  registerLegacyGridContainLabelImpl
+} from "./chunk-CJQJOQQ4.js";
+import {
   extendChartView,
   extendComponentModel,
   extendComponentView,
@@ -40,46 +76,6 @@ import {
   time_exports,
   util_exports as util_exports2
 } from "./chunk-R7GTUHSF.js";
-import {
-  install,
-  install2
-} from "./chunk-MZND4KWK.js";
-import {
-  install as install3,
-  install10 as install13,
-  install11 as install14,
-  install12 as install15,
-  install13 as install17,
-  install14 as install18,
-  install15 as install19,
-  install16 as install20,
-  install17 as install21,
-  install18 as install22,
-  install19 as install23,
-  install2 as install4,
-  install20 as install24,
-  install21 as install25,
-  install22 as install26,
-  install23 as install27,
-  install3 as install5,
-  install4 as install6,
-  install5 as install7,
-  install6 as install9,
-  install7 as install10,
-  install8 as install11,
-  install9 as install12,
-  installScatterJitter
-} from "./chunk-UQ5DQVZW.js";
-import {
-  AXIS_BREAK_COLLAPSE_ACTION_TYPE,
-  AXIS_BREAK_EXPAND_ACTION_TYPE,
-  AXIS_BREAK_TOGGLE_ACTION_TYPE,
-  install3 as install8,
-  install4 as install16,
-  registerAction as registerAction2,
-  registerAxisBreakHelperImpl,
-  registerLegacyGridContainLabelImpl
-} from "./chunk-CJQJOQQ4.js";
 import "./chunk-7Z3DWENT.js";
 import {
   Axis_default,
@@ -145,6 +141,10 @@ import {
   version,
   warn
 } from "./chunk-L5UFJR2Z.js";
+import {
+  install,
+  install2
+} from "./chunk-MZND4KWK.js";
 import {
   BoundingRect_default,
   Displayable_default,

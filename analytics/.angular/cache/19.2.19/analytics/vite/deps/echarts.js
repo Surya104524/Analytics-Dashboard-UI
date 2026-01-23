@@ -1,21 +1,4 @@
 import {
-  extendChartView,
-  extendComponentModel,
-  extendComponentView,
-  extendSeriesModel,
-  format_exports,
-  graphic_exports,
-  helper_exports,
-  installLabelLayout,
-  number_exports,
-  time_exports,
-  util_exports as util_exports2
-} from "./chunk-RFYXWGEJ.js";
-import {
-  install as install26,
-  install2 as install27
-} from "./chunk-NVHC7D7Q.js";
-import {
   install as install28,
   install10 as install37,
   install11 as install38,
@@ -44,6 +27,23 @@ import {
   install9 as install36
 } from "./chunk-K2IZU6XI.js";
 import {
+  install as install26,
+  install2 as install27
+} from "./chunk-NVHC7D7Q.js";
+import {
+  extendChartView,
+  extendComponentModel,
+  extendComponentView,
+  extendSeriesModel,
+  format_exports,
+  graphic_exports,
+  helper_exports,
+  installLabelLayout,
+  number_exports,
+  time_exports,
+  util_exports as util_exports2
+} from "./chunk-RFYXWGEJ.js";
+import {
   install,
   install10 as install11,
   install11 as install12,
@@ -68,8 +68,7 @@ import {
   install8 as install9,
   install9 as install10,
   installScatterJitter
-} from "./chunk-DUOSMQG5.js";
-import "./chunk-GVIKMCNP.js";
+} from "./chunk-WSIZTPND.js";
 import {
   AXIS_BREAK_COLLAPSE_ACTION_TYPE,
   AXIS_BREAK_EXPAND_ACTION_TYPE,
@@ -80,6 +79,7 @@ import {
   registerAxisBreakHelperImpl,
   registerLegacyGridContainLabelImpl
 } from "./chunk-LCOI457P.js";
+import "./chunk-GVIKMCNP.js";
 import {
   Axis_default,
   Chart_default,

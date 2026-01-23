@@ -22,9 +22,9 @@ import {
   install7,
   install8,
   install9
-} from "./chunk-DUOSMQG5.js";
-import "./chunk-GVIKMCNP.js";
+} from "./chunk-WSIZTPND.js";
 import "./chunk-LCOI457P.js";
+import "./chunk-GVIKMCNP.js";
 import "./chunk-672O4MFG.js";
 import "./chunk-L4YY52TH.js";
 import "./chunk-XWLXMCJQ.js";

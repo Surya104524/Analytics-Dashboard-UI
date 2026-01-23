@@ -6,7 +6,7 @@ import {
   OnDestroy,
   ViewChild,
 } from "@angular/core";
-import { interval, Subject } from "rxjs";
+import { Subject } from "rxjs";
 import * as echarts from "echarts/core";
 import { BarChart, PieChart } from "echarts/charts";
 import {
@@ -65,12 +65,26 @@ export class DashboardUiComponent implements AfterViewInit, OnDestroy {
   isDarkTheme: boolean =
     localStorage.getItem("themeStatus") === "true" ? true : false;
   selectedYear: TYears = "2024";
-  selectedDistrict: string = "All Districts";
+  selectedDistrict: string = "All District";
   years: string[] = ["2024", "2025"];
-  minDate: string = "01 Jan 2024";
+  districts: string[] = [
+    "All District",
+    "Ariyulur",
+    "Chennai",
+    "Coimbatore",
+    "Cuddalore",
+    "Dharmapuri",
+    "Dindigul",
+    "Erode",
+    "Kallakurichi",
+    "Karur",
+    "Madurai",
+  ];
+  minDate: string = "01 Jan, 2024";
   maxDate: string = "31 Dec 2024";
   selectedDate: string = `${this.minDate} - ${this.maxDate}`;
   selectActive: "Monthly" | "Quarterly" | null = null;
+  rankBy: string = "Enrollment";
 
   yearWiseData: TDashboardRes = structuredClone(INIT_DASHBOARD_RES);
   constYearWiseData: TDashboardRes = structuredClone(INIT_DASHBOARD_RES);
@@ -89,7 +103,6 @@ export class DashboardUiComponent implements AfterViewInit, OnDestroy {
   constructor(
     private readonly cdr: ChangeDetectorRef,
     private readonly apiService: ApiService,
-    private readonly datePipe: DatePipe,
   ) {}
 
   private getYearWiseData(isCallStatus: "init" | "change") {
@@ -97,7 +110,8 @@ export class DashboardUiComponent implements AfterViewInit, OnDestroy {
       .getYearWiseData(this.selectedYear)
       .subscribe((res) => {
         this.constYearWiseData = res;
-        this.yearWiseData = res;
+        this.yearWiseData = structuredClone(res);
+        this.applyRankBy();
         if (isCallStatus === "change") {
           this.updateAllChartsTheme();
         }
@@ -113,7 +127,7 @@ export class DashboardUiComponent implements AfterViewInit, OnDestroy {
     this.getYearWiseData("init");
     setTimeout(() => {
       this.initCharts();
-    }, 200);
+    }, 1000);
     this.cdr.detectChanges();
   }
 
@@ -125,23 +139,48 @@ export class DashboardUiComponent implements AfterViewInit, OnDestroy {
 
   changeYear() {
     this.selectActive = null;
-    this.minDate = `01 Jan ${this.selectedYear}`;
+    this.minDate = `01 Jan, ${this.selectedYear}`;
     this.maxDate = `31 Dec ${this.selectedYear}`;
     this.selectedDate = `${this.minDate} - ${this.maxDate}`;
     this.getYearWiseData("change");
   }
   changeDistrict() {
-    this.yearWiseData.courseProgress = this.yearWiseData.courseProgress.filter(
-      (course) => course.district === this.selectedDistrict,
-    );
-    this.yearWiseData.districtRanking.districts =
-      this.yearWiseData.districtRanking.districts.filter(
-        (course) => course.district === this.selectedDistrict,
-      );
+    this.yearWiseData = structuredClone(this.constYearWiseData);
+    if (this.selectedDistrict !== "All District") {
+      this.yearWiseData.courseProgress =
+        this.yearWiseData.courseProgress.filter(
+          (course) => course.district === this.selectedDistrict,
+        );
+      this.yearWiseData.districtRanking.districts =
+        this.yearWiseData.districtRanking.districts.filter(
+          (course) => course.district === this.selectedDistrict,
+        );
+    }
+    this.applyRankBy();
     this.updateAllChartsTheme();
   }
+  changeRankBy() {
+    this.applyRankBy();
+    this.updateAllChartsTheme();
+  }
+  private applyRankBy() {
+    const districts = [...this.yearWiseData.districtRanking.districts];
+    if (this.rankBy === "Enrollment") {
+      districts.sort((a, b) => b.enrolled - a.enrolled);
+    } else if (this.rankBy === "Pass %") {
+      districts.sort((a, b) => {
+        const aPass = (a.passed / a.enrolled) * 100;
+        const bPass = (b.passed / b.enrolled) * 100;
+        return bPass - aPass;
+      });
+    }
+    districts.forEach((d, index) => {
+      d.rank = index + 1;
+    });
+    this.yearWiseData.districtRanking.districts = districts;
+  }
   selectRange(selectValue: "Monthly" | "Quarterly") {
-    const fromDate = `01 Jan ${this.selectedYear}`;
+    const fromDate = `01 Jan, ${this.selectedYear}`;
     const toMonthlyDate = `31 Jan ${this.selectedYear}`;
     const toQuarterlyDate = `31 Mar ${this.selectedYear}`;
     const toDate = `31 Dec ${this.selectedYear}`;
@@ -150,8 +189,7 @@ export class DashboardUiComponent implements AfterViewInit, OnDestroy {
       this.selectActive = null;
       this.selectedDate = `${fromDate} - ${toDate}`;
     } else {
-      this.selectedDate = `${fromDate} -
-        ${selectValue === "Monthly" ? toMonthlyDate : toQuarterlyDate}`;
+      this.selectedDate = `${fromDate} - ${selectValue === "Monthly" ? toMonthlyDate : toQuarterlyDate}`;
       this.selectActive = selectValue;
       const summary = this.yearWiseData.summary;
       const months = selectValue === "Monthly" ? 12 : 4;
@@ -162,15 +200,18 @@ export class DashboardUiComponent implements AfterViewInit, OnDestroy {
       summary.others = Math.round(summary.others / months);
       summary.totalLearners = Math.round(summary.totalLearners / months);
     }
+    this.updateAllChartsTheme();
   }
 
   toggleTheme(): void {
     this.isDarkTheme = !this.isDarkTheme;
     localStorage.setItem("themeStatus", this.isDarkTheme ? "true" : "false");
-    if (!this.isDarkTheme) {
+    if (this.isDarkTheme) {
+      this.initCharts();
+    } else {
       setTimeout(() => {
         this.initCharts();
-      }, 1000);
+      }, 200);
     }
   }
 
@@ -246,74 +287,145 @@ export class DashboardUiComponent implements AfterViewInit, OnDestroy {
 
   private getCourseProgressOption(): echarts.EChartsCoreOption {
     const districts: string[] = [];
-    const goodValues: number[] = [];
-    const averageValues: number[] = [];
-    const belowValues: number[] = [];
+    const values: number[] = [];
+    const barColors: string[] = [];
 
     this.yearWiseData.courseProgress.forEach((course) => {
       districts.push(course.district);
-      goodValues.push(course.good);
-      averageValues.push(course.average);
-      belowValues.push(course.below);
+
+      const value = course.good;
+      values.push(value);
+
+      if (value < 40) {
+        barColors.push("#FF6B9D");
+      } else if (value < 70) {
+        barColors.push("#4ECDC4");
+      } else {
+        barColors.push("#7EC3F7");
+      }
     });
 
-    const getColor = (value: number) => {
-      if (value < 40) return "#ff4d4f";
-      if (value < 70) return "#52c41a";
-      return "#1677ff";
-    };
     return {
-      theme: this.getCurrentTheme(),
+      theme: this.isDarkTheme ? "#fff" : "#000",
       legend: {
         data: ["Below", "Average", "Good"],
         right: "0%",
         top: "0%",
+        itemGap: 20,
+        textStyle: {
+          color: this.isDarkTheme ? "#fff" : "#000",
+          fontSize: 12,
+        },
+        selected: {
+          Below: false,
+          Average: false,
+          Good: true,
+        },
+        itemWidth: 10,
+        itemHeight: 10,
       },
       tooltip: {
         trigger: "axis",
-        axisPointer: { type: "shadow" },
         formatter: (params: any) => {
-          const value = params[0].value;
-          return `${params[0].name}<br/>Max Value: <b>${value}</b>`;
+          const index = params[0].dataIndex;
+          const course = this.yearWiseData.courseProgress[index];
+
+          const maxType =
+            course.good >= course.average && course.good >= course.below
+              ? "Good"
+              : course.average >= course.below
+                ? "Average"
+                : "Below";
+
+          return `
+      <b>${course.district}</b><br/>
+      Good: ${course.good}%<br/>
+      Average: ${course.average}%<br/>
+      Below: ${course.below}%<br/>
+      <b>Highest: ${maxType}</b>
+    `;
         },
       },
-      grid: { left: "10%", right: "10%", bottom: "15%", top: "10%" },
+
+      grid: { left: "10%", right: "10%", bottom: "15%", top: "15%" },
       xAxis: {
         type: "category",
         data: districts,
         axisLabel: {
           interval: 0,
-          fontSize: 8,
+          fontSize: 10,
+          color: this.isDarkTheme ? "#fff" : "#000",
+          rotate: 0,
+        },
+        axisLine: {
+          lineStyle: {
+            color: this.isDarkTheme
+              ? "rgba(255, 255, 255, 0.2)"
+              : "rgba(0, 0, 0, 0.2)",
+          },
         },
       },
-      yAxis: { type: "value", min: 0, max: 100, interval: 20 },
+      yAxis: {
+        type: "value",
+        min: 0,
+        max: 100,
+        interval: 10,
+        name: "Course Progress %",
+        nameLocation: "middle",
+        nameGap: 50,
+        nameTextStyle: {
+          color: this.isDarkTheme ? "#fff" : "#000",
+          fontSize: 12,
+        },
+        axisLabel: {
+          color: this.isDarkTheme ? "#fff" : "#000",
+          formatter: "{value}",
+        },
+        axisLine: {
+          lineStyle: {
+            color: this.isDarkTheme
+              ? "rgba(255, 255, 255, 0.2)"
+              : "rgba(0, 0, 0, 0.2)",
+          },
+        },
+        splitLine: {
+          lineStyle: {
+            color: this.isDarkTheme
+              ? "rgba(255, 255, 255, 0.1)"
+              : "rgba(0, 0, 0, 0.1)",
+          },
+        },
+      },
       series: [
         {
-          name: "Good",
+          name: "Below",
           type: "bar",
-          data: goodValues,
+          stack: "progress",
+          data: values,
           itemStyle: {
-            color: (params: any) => getColor(params.value),
+            color: (params: any) => barColors[params.dataIndex],
           },
-          barMaxWidth: 40,
+          barMaxWidth: 45,
         },
         {
           name: "Average",
           type: "bar",
-          data: averageValues,
+          stack: "progress",
+          data: values,
           itemStyle: {
-            color: (params: any) => getColor(params.value),
+            color: (params: any) => barColors[params.dataIndex],
           },
-          barMaxWidth: 40,
+          barMaxWidth: 45,
         },
         {
-          name: "Below",
+          name: "Good",
           type: "bar",
-          data: belowValues,
+          stack: "progress",
+          data: values,
           itemStyle: {
-            color: (params: any) => getColor(params.value),
+            color: (params: any) => barColors[params.dataIndex],
           },
-          barMaxWidth: 40,
+          barMaxWidth: 45,
         },
       ],
     };
@@ -321,7 +433,6 @@ export class DashboardUiComponent implements AfterViewInit, OnDestroy {
 
   private getPassPercentageOption(): echarts.EChartsCoreOption {
     const stats = this.yearWiseData.passStats;
-
     const total = stats.overallLearners;
 
     const categories = [
@@ -345,20 +456,26 @@ export class DashboardUiComponent implements AfterViewInit, OnDestroy {
       stats.failed,
     ];
 
-    const colors = ["#7EC3F7", "#3EC6D8", "#00C897", "#FF8A8A"];
+    const colors = ["#7EC3F7", "#3EC6D8", "#10B981", "#FF6B9D"];
+    const theme = this.getCurrentTheme();
 
     return {
-      theme: this.getCurrentTheme(),
+      theme: theme,
       grid: {
-        left: "15%",
+        left: "20%",
         right: "10%",
         top: "10%",
-        bottom: "15%",
+        bottom: "10%",
       },
-
       tooltip: {
         trigger: "axis",
         axisPointer: { type: "shadow" },
+        backgroundColor: this.isDarkTheme
+          ? "rgba(0, 0, 0, 0.8)"
+          : "rgba(255, 255, 255, 0.95)",
+        textStyle: {
+          color: theme.textStyle.color,
+        },
         formatter: (params: any) => {
           const i = params[0].dataIndex;
           return `
@@ -368,44 +485,55 @@ export class DashboardUiComponent implements AfterViewInit, OnDestroy {
         `;
         },
       },
-
       xAxis: {
         type: "value",
         min: 0,
         max: 100,
+        interval: 20,
+        name: "Performance",
+        nameLocation: "middle",
+        nameGap: 30,
+        nameTextStyle: {
+          color: theme.textStyle.color,
+          fontSize: 12,
+        },
         axisLabel: {
           formatter: "{value}%",
+          color: theme.textStyle.color,
+        },
+        axisLine: {
+          lineStyle: {
+            color: this.isDarkTheme
+              ? "rgba(255, 255, 255, 0.2)"
+              : "rgba(0, 0, 0, 0.2)",
+          },
+        },
+        splitLine: {
+          lineStyle: {
+            color: this.isDarkTheme
+              ? "rgba(255, 255, 255, 0.1)"
+              : "rgba(0, 0, 0, 0.1)",
+          },
         },
       },
-
       yAxis: {
         type: "category",
         inverse: true,
         data: categories,
         axisLabel: {
-          show: false,
+          show: true,
+          color: theme.textStyle.color,
+          fontSize: 12,
+        },
+        axisLine: {
+          lineStyle: {
+            color: this.isDarkTheme
+              ? "rgba(255, 255, 255, 0.2)"
+              : "rgba(0, 0, 0, 0.2)",
+          },
         },
       },
-
       series: [
-        {
-          type: "bar",
-          data: values,
-          barWidth: 22,
-          itemStyle: { color: "transparent" },
-          label: {
-            show: true,
-            position: "left",
-            formatter: (p: any) => actualCounts[p.dataIndex].toLocaleString(),
-            color: "#000",
-            fontWeight: "bold",
-          },
-          labelLayout: {
-            align: "right",
-            verticalAlign: "center",
-            moveOverlap: "shiftY",
-          },
-        },
         {
           type: "bar",
           data: values.map((v, i) => ({
@@ -413,14 +541,15 @@ export class DashboardUiComponent implements AfterViewInit, OnDestroy {
             itemStyle: { color: colors[i] },
             label: {
               show: true,
-              position: "insideLeft",
-              formatter: categories[i],
+              position: "right",
+              formatter: (p: any) =>
+                `${actualCounts[p.dataIndex].toLocaleString()}`,
+              color: theme.textStyle.color,
               fontWeight: "bold",
-              padding: [0, 0, 0, 8],
-              color: "#000",
+              fontSize: 12,
             },
           })),
-          barWidth: 22,
+          barWidth: 30,
         },
       ],
     };
@@ -428,34 +557,72 @@ export class DashboardUiComponent implements AfterViewInit, OnDestroy {
 
   private getAssessmentScoreOption(): echarts.EChartsCoreOption {
     const percent = this.yearWiseData.assessmentCompletion;
+    const theme = this.getCurrentTheme();
     return {
-      theme: this.getCurrentTheme(),
-      title: { text: "All Districts", top: "50%", textVerticalAlign: "middle" },
+      theme: theme,
+      title: {
+        text: "All Districts",
+        left: "center",
+        top: "center",
+        textStyle: {
+          color: theme.textStyle.color,
+          fontSize: 16,
+          fontWeight: "bold",
+        },
+      },
       tooltip: {
         trigger: "item",
+        backgroundColor: this.isDarkTheme
+          ? "rgba(0, 0, 0, 0.8)"
+          : "rgba(255, 255, 255, 0.95)",
+        textStyle: {
+          color: theme.textStyle.color,
+        },
+        formatter: "{b}: {c}%",
       },
-
+      legend: {
+        show: false,
+      },
       series: [
         {
           name: "Score",
           type: "pie",
           radius: ["60%", "85%"],
+          center: ["50%", "50%"],
+          avoidLabelOverlap: false,
           label: {
             show: true,
-            formatter: "{b}: {c}%",
+            formatter: "{b}\n{c}%",
             fontSize: 12,
+            color: theme.textStyle.color,
           },
           labelLine: {
             show: true,
+            lineStyle: {
+              color: theme.textStyle.color,
+            },
+          },
+          emphasis: {
+            label: {
+              show: true,
+              fontSize: 14,
+              fontWeight: "bold",
+            },
           },
           data: [
             {
               value: percent.completedPercent,
-              name: "Assessment Completed",
+              name: "Assessment completed",
+              itemStyle: {
+                color: "#7EC3F7",
+              },
             },
             {
               value: percent.notCompletedPercent,
-              name: "Assessment Not Completed",
+              name: "Assessment not completed",
+              itemStyle: {
+                color: "#F59E0B",
+              },
             },
           ],
         },
@@ -465,18 +632,71 @@ export class DashboardUiComponent implements AfterViewInit, OnDestroy {
 
   private getLearnerDetailsOption(): echarts.EChartsCoreOption {
     const gradeData = this.yearWiseData.gradeBreakdown;
+    const theme = this.getCurrentTheme();
+    const gradeColors: { [key: string]: string } = {
+      "A - Grade (>80)": "#7EC3F7",
+      "B - Grade (>60)": "#4ECDC4",
+      "C - Grade (>50)": "#F59E0B",
+      "D - Grade (>30)": "#FF6B9D",
+      "E - Grade (0)": "#D3D3D3",
+    };
     return {
-      theme: this.getCurrentTheme(),
-      tooltip: { trigger: "item" },
-      legend: { top: 50, right: 10, orient: "vertical", itemGap: 30 },
+      theme: theme,
+      tooltip: {
+        trigger: "item",
+        backgroundColor: this.isDarkTheme
+          ? "rgba(0, 0, 0, 0.8)"
+          : "rgba(255, 255, 255, 0.95)",
+        textStyle: {
+          color: theme.textStyle.color,
+        },
+        formatter: "{b}: {c}%",
+      },
+      legend: {
+        top: "10%",
+        right: "5%",
+        orient: "vertical",
+        itemGap: 15,
+        textStyle: {
+          color: theme.textStyle.color,
+          fontSize: 12,
+        },
+        itemWidth: 12,
+        itemHeight: 12,
+        formatter: (name: string) => {
+          const item = gradeData.find((g) => g.label === name);
+          return `${item?.percent || 0}% ${name}`;
+        },
+      },
       series: [
         {
           name: "Grades",
           type: "pie",
           radius: "65%",
+          center: ["35%", "55%"],
+          avoidLabelOverlap: false,
+          label: {
+            show: true,
+            formatter: "{c}%",
+            fontSize: 11,
+            color: theme.textStyle.color,
+          },
+          labelLine: {
+            show: false,
+          },
+          emphasis: {
+            label: {
+              show: true,
+              fontSize: 14,
+              fontWeight: "bold",
+            },
+          },
           data: gradeData.map((g) => ({
             value: g.percent,
             name: g.label,
+            itemStyle: {
+              color: gradeColors[g.label] || "#7EC3F7",
+            },
           })),
         },
       ],
@@ -484,103 +704,183 @@ export class DashboardUiComponent implements AfterViewInit, OnDestroy {
   }
   private getDistrictRankingOption(): echarts.EChartsCoreOption {
     const data = this.yearWiseData.districtRanking.districts;
+    const theme = this.getCurrentTheme();
 
-    const districts = data.map((d: any) => `${d.district}\nRank - ${d.rank}`);
+    const districts = data.map((d: any) => `${d.district}\nRank ${d.rank}`);
 
     return {
-      theme: this.getCurrentTheme(),
+      theme: theme,
       legend: {
         top: 10,
         right: 10,
-        itemGap: 20,
+        itemGap: 15,
+        textStyle: {
+          color: theme.textStyle.color,
+          fontSize: 11,
+        },
+        itemWidth: 10,
+        itemHeight: 10,
         data: ["Male", "Female", "Others", "Passed", "Assessment completed"],
       },
-
       tooltip: {
         trigger: "axis",
         axisPointer: { type: "shadow" },
+        backgroundColor: this.isDarkTheme
+          ? "rgba(0, 0, 0, 0.8)"
+          : "rgba(255, 255, 255, 0.95)",
+        textStyle: {
+          color: theme.textStyle.color,
+        },
         formatter: (params: any[]) => {
           const d = data[params[0].dataIndex];
+          const passPercent = Math.round((d.passed / d.enrolled) * 100);
           return `
           <b>${d.district}</b><br/>
           Enrolment<br/>
-          Male : ${d.male.toLocaleString()}<br/>
-          Female : ${d.female.toLocaleString()}<br/>
-          Others : ${d.others.toLocaleString()}<br/><br/>
-          Pass% : ${Math.round((d.passed / d.enrolled) * 100)}%<br/>
-          Course completion% : ${d.completionRatePercent}%
+          Male: ${d.male.toLocaleString()}<br/>
+          Female: ${d.female.toLocaleString()}<br/>
+          Others: ${d.others.toLocaleString()}<br/><br/>
+          Pass%: ${passPercent}% Passed<br/>
+          Course completion%: ${d.completionRatePercent}% Course Completed
         `;
         },
       },
-
       grid: {
-        left: "6%",
-        right: "6%",
-        bottom: "15%",
-        top: "15%",
+        left: "8%",
+        right: "8%",
+        bottom: "20%",
+        top: "18%",
       },
-
       xAxis: {
         type: "category",
         data: districts,
+        name: "Top 10 Districts",
+        nameLocation: "middle",
+        nameGap: 30,
+        nameTextStyle: {
+          color: theme.textStyle.color,
+          fontSize: 12,
+        },
         axisLabel: {
           interval: 0,
           rotate: 35,
+          color: theme.textStyle.color,
+          fontSize: 10,
+          lineHeight: 16,
+        },
+        axisLine: {
+          lineStyle: {
+            color: this.isDarkTheme
+              ? "rgba(255, 255, 255, 0.2)"
+              : "rgba(0, 0, 0, 0.2)",
+          },
         },
       },
-
       yAxis: [
         {
           type: "value",
           name: "Number of users",
+          nameLocation: "middle",
+          nameGap: 50,
+          min: 0,
+          max: 25000,
+          interval: 2500,
+          nameTextStyle: {
+            color: theme.textStyle.color,
+            fontSize: 12,
+          },
           axisLabel: {
             formatter: (v: number) => v.toLocaleString(),
+            color: theme.textStyle.color,
+          },
+          axisLine: {
+            lineStyle: {
+              color: this.isDarkTheme
+                ? "rgba(255, 255, 255, 0.2)"
+                : "rgba(0, 0, 0, 0.2)",
+            },
+          },
+          splitLine: {
+            lineStyle: {
+              color: this.isDarkTheme
+                ? "rgba(255, 255, 255, 0.1)"
+                : "rgba(0, 0, 0, 0.1)",
+            },
           },
         },
         {
           type: "value",
-          name: "Pass/Completion %",
+          name: "Pass/completion %",
           min: 0,
           max: 100,
+          interval: 10,
+          nameLocation: "middle",
+          nameGap: 50,
+          nameTextStyle: {
+            color: theme.textStyle.color,
+            fontSize: 12,
+          },
           axisLabel: {
             formatter: "{value}%",
+            color: theme.textStyle.color,
+          },
+          axisLine: {
+            lineStyle: {
+              color: this.isDarkTheme
+                ? "rgba(255, 255, 255, 0.2)"
+                : "rgba(0, 0, 0, 0.2)",
+            },
           },
         },
       ],
-
       series: [
-        /* Enrollment Stack */
         {
           name: "Male",
           type: "bar",
+          yAxisIndex: 0,
           stack: "enrollment",
           data: data.map((d: any) => d.male),
+          itemStyle: {
+            color: "#3B82F6",
+          },
         },
         {
           name: "Female",
           type: "bar",
+          yAxisIndex: 0,
           stack: "enrollment",
           data: data.map((d: any) => d.female),
+          itemStyle: {
+            color: "#EC4899",
+          },
         },
         {
           name: "Others",
           type: "bar",
+          yAxisIndex: 0,
           stack: "enrollment",
           data: data.map((d: any) => d.others),
+          itemStyle: {
+            color: "#8B5CF6",
+          },
         },
-
-        /* Passed */
         {
           name: "Passed",
           type: "bar",
-          data: data.map((d: any) => d.passed),
+          yAxisIndex: 1,
+          data: data.map((d: any) => Math.round((d.passed / d.enrolled) * 100)),
+          itemStyle: {
+            color: "#10B981",
+          },
         },
-
-        /* Assessment Completed */
         {
           name: "Assessment completed",
           type: "bar",
-          data: data.map((d: any) => d.assessmentCompleted),
+          yAxisIndex: 1,
+          data: data.map((d: any) => d.completionRatePercent),
+          itemStyle: {
+            color: "#F59E0B",
+          },
         },
       ],
     };

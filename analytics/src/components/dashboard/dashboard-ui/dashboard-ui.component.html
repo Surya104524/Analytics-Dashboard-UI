@@ -1,29 +1,33 @@
 <div class="dashboard" [class.light]="!isDarkTheme" [class.dark]="isDarkTheme">
   <div class="header">
-    <div class="title">Learning Dashboard</div>
+    <h1 class="dashboard-title">Dashboard</h1>
     <div class="controls">
-      <div class="select-yearly-range">
-        <button
-          class="select-yearly-range-btn"
-          [ngClass]="{ isActive: selectActive === 'Monthly' }"
-          (click)="selectRange('Monthly')"
-        >
-          Monthly
+      <div class="period-navigation">
+        <button class="nav-arrow" (click)="selectRange('Monthly')">
+          <i class="bi bi-chevron-left"></i>
         </button>
-        <button
-          class="select-yearly-range-btn"
-          [ngClass]="{ isActive: selectActive === 'Quarterly' }"
-          (click)="selectRange('Quarterly')"
-        >
-          Quarterly
+        <div class="select-yearly-range">
+          <button
+            class="select-yearly-range-btn"
+            [ngClass]="{ isActive: selectActive === 'Monthly' }"
+            (click)="selectRange('Monthly')"
+          >
+            Monthly
+          </button>
+          <button
+            class="select-yearly-range-btn"
+            [ngClass]="{ isActive: selectActive === 'Quarterly' }"
+            (click)="selectRange('Quarterly')"
+          >
+            Quarterly
+          </button>
+        </div>
+        <button class="nav-arrow" (click)="selectRange('Quarterly')">
+          <i class="bi bi-chevron-right"></i>
         </button>
       </div>
       <div class="datengx-model">
-        <img
-          class="calendaricon"
-          src="assets/icons/datepickericon.png"
-          alt="date"
-        />
+        <i class="bi bi-calendar2-week"></i>
         <p>{{ selectedDate }}</p>
       </div>
       <select
@@ -35,19 +39,15 @@
           {{ year }}
         </option>
       </select>
-      <!-- <select
+      <select
         class="years-selector"
         [(ngModel)]="selectedDistrict"
         (change)="changeDistrict()"
       >
-        <option value="All Districts">All Districts</option>
-        <option
-          *ngFor="let district of constYearWiseData.courseProgress"
-          [value]="district.district"
-        >
-          {{ district.district }}
+        <option *ngFor="let district of districts" [value]="district">
+          {{ district }}
         </option>
-      </select> -->
+      </select>
       <button class="theme-toggle" (click)="toggleTheme()">
         <span *ngIf="isDarkTheme">🌙</span>
         <span *ngIf="!isDarkTheme">☀️</span>
@@ -57,38 +57,80 @@
 
   <div class="main-stats">
     <div class="stat-card">
-      <div class="stat-label">Total Learner Enrolled</div>
-      <div class="stat-number" [style.color]="'#10b981'">
+      <div class="stat-label">Total Learner enrolled</div>
+      <div class="stat-number total-learners">
         {{ yearWiseData.summary.totalLearners | number }}
       </div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Male</div>
-      <div class="stat-number" [style.color]="'#3b82f6'">
-        {{ yearWiseData.summary.male | number }}
+      <div class="stat-number gender-stat">
+        <img
+          *ngIf="isDarkTheme"
+          src="assets/jsonResponses/icons/dark-men-icon.png"
+          alt="male-icon"
+          class="gender-icon"
+        />
+        <img
+          *ngIf="!isDarkTheme"
+          src="assets/jsonResponses/icons/light-men-icon.png"
+          alt="male-icon"
+          class="gender-icon"
+        />
+        <span class="gender-value">{{
+          yearWiseData.summary.male | number
+        }}</span>
       </div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Female</div>
-      <div class="stat-number" [style.color]="'#f59e0b'">
-        {{ yearWiseData.summary.female | number }}
+      <div class="stat-number gender-stat">
+        <img
+          *ngIf="isDarkTheme"
+          src="assets/jsonResponses/icons/dark-women-icon.png"
+          alt="female-icon"
+          class="gender-icon"
+        />
+        <img
+          *ngIf="!isDarkTheme"
+          src="assets/jsonResponses/icons/light-women-icon.png"
+          alt="female-icon"
+          class="gender-icon"
+        />
+        <span class="gender-value">{{
+          yearWiseData.summary.female | number
+        }}</span>
       </div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Others</div>
-      <div class="stat-number" [style.color]="'#ef4444'">
-        {{ yearWiseData.summary.others | number }}
+      <div class="stat-number gender-stat">
+        <img
+          *ngIf="isDarkTheme"
+          src="assets/jsonResponses/icons/dark-others-icon.png"
+          alt="others-icon"
+          class="gender-icon"
+        />
+        <img
+          *ngIf="!isDarkTheme"
+          src="assets/jsonResponses/icons/light-others-icon.png"
+          alt="others-icon"
+          class="gender-icon"
+        />
+        <span class="gender-value">{{
+          yearWiseData.summary.others | number
+        }}</span>
       </div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Active Learners</div>
-      <div class="stat-number" [style.color]="'#8b5cf6'">
+      <div class="stat-number active-learners">
         {{ yearWiseData.summary.activeLearners | number }}
       </div>
     </div>
-    <div class="stat-card border-0">
+    <div class="stat-card last-stat-card">
       <div class="stat-label">Engaged Learners</div>
-      <div class="stat-number" [style.color]="'#8b5cf6'">
+      <div class="stat-number engaged-learners">
         {{ yearWiseData.summary.engagedLearners | number }}
       </div>
     </div>
@@ -96,52 +138,125 @@
 
   <div class="charts-grid">
     <div class="chart-container">
-      <div class="chart-title">📈 Course Progress Rate</div>
-      <div #courseProgress class="chart-wrapper"></div>
+      <div class="chart-header">
+        <div class="d-flex gap-2 align-items-center">
+          <img
+            src="assets/jsonResponses/icons/dots.png"
+            alt="dots"
+            width="10px"
+          />
+          <div class="chart-title">Course progress rate</div>
+        </div>
+      </div>
+      <div class="chart-navigation-wrapper">
+        <button class="chart-nav-arrow">
+          <i class="bi bi-chevron-left"></i>
+        </button>
+        <div #courseProgress class="chart-wrapper"></div>
+        <button class="chart-nav-arrow">
+          <i class="bi bi-chevron-right"></i>
+        </button>
+      </div>
     </div>
     <div class="chart-container">
-      <div class="chart-title">📊 Pass Percentage</div>
+      <div class="chart-header">
+        <div class="d-flex gap-2 align-items-center">
+          <img
+            src="assets/jsonResponses/icons/dots.png"
+            alt="dots"
+            width="10px"
+          />
+          <div class="chart-title">Pass Percentage</div>
+        </div>
+      </div>
       <div #passPercentage class="chart-wrapper"></div>
     </div>
     <div class="chart-container">
-      <div class="chart-title">📊 Average Assessment Score</div>
+      <div class="chart-header">
+        <div class="d-flex gap-2 align-items-center">
+          <img
+            src="assets/jsonResponses/icons/dots.png"
+            alt="dots"
+            width="10px"
+          />
+          <div class="chart-title">Average assessment score</div>
+        </div>
+      </div>
       <div #assessmentScore class="chart-wrapper"></div>
     </div>
     <div class="chart-container">
-      <div class="chart-title">👥 Learner Details Breakdown</div>
+      <div class="chart-header">
+        <div class="d-flex gap-2 align-items-center">
+          <img
+            src="assets/jsonResponses/icons/dots.png"
+            alt="dots"
+            width="10px"
+          />
+          <div class="chart-title">Learners Details Breakdown</div>
+        </div>
+      </div>
       <div #learnerDetails class="chart-wrapper"></div>
     </div>
   </div>
-
-  <div class="charts-grid" *ngIf="!isDarkTheme">
-    <div class="ranking-section">
-      <div class="chart-container">
-        <div class="chart-title">🏆 District Ranking</div>
-        <div class="ranking-container">
-          <div class="ranking-item">
-            <div #districtRanking class="chart-wrapper"></div>
+  <span *ngIf="!isDarkTheme">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <div class="chart-title">District Ranking</div>
+      <div class="chart-header-controls">
+        <select
+          class="rank-by-selector"
+          [(ngModel)]="rankBy"
+          (change)="changeRankBy()"
+        >
+          <option value="Enrollment">Rank by Enrolment</option>
+          <option value="Pass %">Rank by Pass %</option>
+        </select>
+      </div>
+    </div>
+    <div class="charts-grid district-rank-section">
+      <div class="chart-container district-ranking-chart">
+        <div class="chart-header">
+          <div class="d-flex gap-2 align-items-center">
+            <img
+              src="assets/jsonResponses/icons/dots.png"
+              alt="dots"
+              width="10px"
+            />
+            <div class="chart-subtitle">Top Districts</div>
+          </div>
+        </div>
+        <div #districtRanking class="chart-wrapper"></div>
+      </div>
+    </div>
+  </span>
+  <span *ngIf="isDarkTheme">
+    <div class="chart-title">All District with Ranking</div>
+    <div class="charts-grid district-rank-grid">
+      <div class="chart-container district-ranking-section">
+        <div class="chart-header">
+          <div class="d-flex gap-2">
+            <img
+              src="assets/jsonResponses/icons/dots.png"
+              alt="dots"
+              width="10px"
+            />
+            <div class="chart-subtitle">District Ranking</div>
+          </div>
+        </div>
+        <div class="chart-wrapper">
+          <div class="district-ranking-list">
+            <div
+              class="district-ranking-data"
+              *ngFor="let district of yearWiseData.districtRanking.districts"
+            >
+              <p class="district-name">{{ district.district }}</p>
+              <div class="rank-box">
+                <h3>{{ district.rank | ordinal }}</h3>
+                <p class="rank-label">Rank</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-  <div class="charts-grid district-rank-grid" *ngIf="isDarkTheme">
-    <div class="chart-container district-ranking-section">
-      <div class="chart-title">🏆 District Ranking</div>
-      <div class="chart-wrapper">
-        <div class="district-ranking-list">
-          <div
-            class="district-ranking-data"
-            *ngFor="let district of yearWiseData.districtRanking.districts"
-          >
-            <p>{{ district.district }}</p>
-            <span class="rank-box">
-              <h3>{{ district.rank | ordinal }}</h3>
-              <p>Rank</p>
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+  </span>
 </div>
